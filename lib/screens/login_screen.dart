@@ -4,20 +4,48 @@ import 'task_list_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final bool showLogoutMessage;
+
+  const LoginScreen({super.key, this.showLogoutMessage = false});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _auth = FirebaseAuth.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _auth = FirebaseAuth.instance;
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showLogoutMessage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Anda telah berjaya log keluar 🌸'),
+            backgroundColor: Colors.pinkAccent,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   void _login() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    final emailText = _emailController.text.trim();
+    final passwordText = _passwordController.text.trim();
+
+    if (emailText.isEmpty || passwordText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Sila isi emel dan kata laluan!')),
       );
@@ -30,8 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+        email: emailText,
+        password: passwordText,
       );
 
       if (mounted) {
@@ -43,7 +71,10 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Log masuk gagal: ${e.toString()}')),
+          const SnackBar(
+            content: Text('Log masuk gagal'), // Mesej diringkaskan
+            backgroundColor: Colors.redAccent,
+          ),
         );
       }
     } finally {
@@ -62,54 +93,64 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'My Task Manager 🌸',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.pink),
-              ),
-              const SizedBox(height: 8),
-              const Text('Sila log masuk untuk mengurus tugasan anda', style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Emel',
-                  prefixIcon: Icon(Icons.email, color: Colors.pink),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Kata Laluan',
-                  prefixIcon: Icon(Icons.lock, color: Colors.pink),
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 24),
-              _isLoading
-                  ? const CircularProgressIndicator(color: Colors.pink)
-                  : ElevatedButton(
-                      onPressed: _login,
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                      ),
-                      child: const Text('Log Masuk', style: TextStyle(fontSize: 16)),
+          child: Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Log Masuk 🌸',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.pink),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: 'Emel',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-              const SizedBox(height: 8),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const RegisterScreen()),
-                  );
-                },
-                child: const Text('Belum ada akaun? Daftar Sini', style: TextStyle(color: Colors.pink)),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Kata Laluan',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator(color: Colors.pink))
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.pink,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          onPressed: _login,
+                          child: const Text('Masuk 💕', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                      );
+                    },
+                    child: const Text('Belum ada akaun? Daftar di sini', style: TextStyle(color: Colors.pink)),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

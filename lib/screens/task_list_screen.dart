@@ -24,7 +24,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
     if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(showLogoutMessage: true),
+        ),
       );
     }
   }
@@ -36,7 +38,35 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   void _deleteTask(String docId) {
-    _firestore.collection('tasks').doc(docId).delete();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Padam Tugasan? 🗑️'),
+          content: const Text('Adakah anda pasti mahu memadam tugasan ini?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(), 
+              child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () {
+                _firestore.collection('tasks').doc(docId).delete(); 
+                Navigator.of(context).pop(); 
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Tugasan telah dipadam!')),
+                );
+              },
+              child: const Text(
+                'Padam', 
+                style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showAddTaskBottomSheet() {
