@@ -111,7 +111,7 @@ class _EditTaskScreenState extends State<EditTaskScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.pinkAccent,
+                color: Colors.blueAccent,
               ),
               textAlign: TextAlign.center,
             ),

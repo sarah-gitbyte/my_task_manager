@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
                       ),
-                      child: const Text('Daftar Now', style: TextStyle(fontSize: 16)),
+                      child: const Text('Daftar Sekarang', style: TextStyle(fontSize: 16)),
                     ),
               TextButton(
                 onPressed: () {
